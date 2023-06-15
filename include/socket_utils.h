@@ -2,6 +2,7 @@
 # define SOCKET_UTILS_H
 
 #include <netinet/in.h>
+#include <sys/time.h>
 
 # define SOCKET_ICMP_USE_DGRAM 1
 

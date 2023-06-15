@@ -52,7 +52,7 @@ int	socket_icmp(int *socket_type)
 	if (sd != -1)
 	{
 		if (!setsockopt_err)
-			setsockopt_err = setsockopt(sd, SOL_SOCKET, SO_TIMESTAMP_OLD,
+			setsockopt_err = setsockopt(sd, SOL_SOCKET, SO_TIMESTAMP,
 				&opt_true, sizeof(opt_true));
 
 		if (setsockopt_err)
@@ -96,7 +96,7 @@ void	socket_packet_stat(struct msghdr *message,
 		switch (cframe->cmsg_level)
 		{
 			case SOL_SOCKET:
-				if (cframe->cmsg_type == SO_TIMESTAMP_OLD)
+				if (cframe->cmsg_type == SO_TIMESTAMP)
 					*timestamp = *(struct timeval *)CMSG_DATA(cframe);
 
 				break;
