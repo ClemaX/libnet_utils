@@ -1,29 +1,25 @@
 #ifndef ICMP_ECHO_H
 # define ICMP_ECHO_H
 
+# include <sys/time.h>
+
 # include <icmp_packet.h>
 
-typedef struct	icmp_echo_stats
-{
-	struct timeval	start_time;
-	struct timeval	last_send_time;
-	float			time_sum_ms;
-	float			time_sum_ms_sq;
-	float			min_time_ms;
-	float			max_time_ms;
-	unsigned		transmitted;
-	unsigned		received;
-	char			*host_name;
-	char			*host_presentation;
-}				icmp_echo_stats;
+# define ICMP_ECHO_ESEND	0b00000001
+# define ICMP_ECHO_ERECV	0b00000010
+# define ICMP_ECHO_ETIMEO	0b00000100
 
-typedef int (icmp_echo_fun(icmp_echo_stats *stats,
-	const struct sockaddr_in *addr, int sd, uint16_t id, uint16_t sequence));
+typedef int (icmp_echo_fun(int sd, const icmp_echo_params *params,
+	icmp_packet *response, struct timeval t[2]));
 
-int			icmp_echo(icmp_echo_stats *stats,
-	const struct sockaddr_in *addr, int sd, uint16_t id, uint16_t sequence);
 
-int			icmp_echo_dgram(icmp_echo_stats *stats,
-	const struct sockaddr_in *addr, int sd, uint16_t id, uint16_t sequence);
+int			icmp_echo(int sd, int socket_type, const icmp_echo_params *params,
+	icmp_packet *response, struct timeval t[2]);
+
+int			icmp_echo_raw(int sd, const icmp_echo_params *params,
+	icmp_packet *response, struct timeval t[2]);
+
+int			icmp_echo_dgram(int sd, const icmp_echo_params *params,
+	icmp_packet *response, struct timeval t[2]);
 
 #endif

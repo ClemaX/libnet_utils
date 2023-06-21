@@ -7,8 +7,7 @@
 
 #include <icmp_packet.h>
 
-icmp_packet	*icmp_echo_request(const struct sockaddr_in *addr,
-	uint16_t id, uint16_t sequence)
+icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params)
 {
 	static icmp_packet	packet =
 	{
@@ -31,12 +30,13 @@ icmp_packet	*icmp_echo_request(const struct sockaddr_in *addr,
 		.payload = ICMP_ECHO_PAYLOAD,
 	};
 
+	packet.ip_header.daddr = params->destination->sin_addr.s_addr;
+
 	packet.ip_header.frag_off = htons(0 | IP_DF);
+	packet.ip_header.ttl = params->time_to_live;
 
-	packet.ip_header.daddr = addr->sin_addr.s_addr;
-
-	packet.icmp_header.un.echo.id = htons(id);
-	packet.icmp_header.un.echo.sequence = htons(sequence);
+	packet.icmp_header.un.echo.id = htons(params->id);
+	packet.icmp_header.un.echo.sequence = htons(params->sequence);
 
 	packet.icmp_header.checksum = 0;
 	packet.icmp_header.checksum = ip_checksum(&packet.icmp_header,

@@ -1,47 +1,57 @@
-#include <sys/socket.h>
 #include <sys/time.h>
 
 #include <stdio.h>
 #include <errno.h>
 
-#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #include <socket_utils.h>
 #include <icmp_echo.h>
 #include <time_utils.h>
 
 
-static int	icmp_echo_send(const struct sockaddr_in *addr, int sd,
-	uint16_t id, uint16_t sequence, struct timeval *timestamp)
+static int	icmp_echo_send(int sd, const icmp_echo_params *params,
+	struct timeval *time)
 {
 	icmp_packet	*request;
 	ssize_t		ret;
+	int			status;
 
-	request = icmp_echo_request(addr, id, sequence);
+	request = icmp_echo_request(params);
 
-	gettimeofday(timestamp, NULL);
+	gettimeofday(time, NULL);
 
 	ret = sendto(sd, request, sizeof(*request), 0,
-		(const struct sockaddr*)addr, sizeof(*addr));
+		(const struct sockaddr*)params->destination,
+		sizeof(*params->destination));
 
-	return -(ret <= 0);
+	status = ret == -1;
+
+	if (status != 0)
+	{
+		status = ICMP_ECHO_ESEND;
+
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			status |= ICMP_ECHO_ETIMEO;
+	}
+
+	return status;
 }
 
-static int	icmp_echo_recv(const struct sockaddr_in *addr, int sd,
-	struct icmp_packet *request, struct icmp_packet *response,
-	struct timeval *timestamp)
+static int	icmp_echo_recv(int sd, const struct sockaddr_in *addr,
+	struct icmp_packet *response, struct timeval *time)
 {
 	static struct sockaddr_in	src_addr;
 	static struct iovec			frames[] =
 	{
-		{NULL, sizeof(request->ip_header)},
-		{NULL, sizeof(request->icmp_header)},
-		{NULL, sizeof(request->payload)},
+		{NULL, sizeof(response->ip_header)},
+		{NULL, sizeof(response->icmp_header)},
+		{NULL, sizeof(response->payload)},
 	};
 	struct msghdr *const		message = socket_msghdr(&src_addr, frames,
 		sizeof(frames) / sizeof(*frames));
-	ssize_t					ret;
-	int						err;
+	ssize_t						ret;
+	int							status;
 
 	frames[0].iov_base = &response->ip_header;
 	frames[1].iov_base = &response->icmp_header;
@@ -49,71 +59,41 @@ static int	icmp_echo_recv(const struct sockaddr_in *addr, int sd,
 
 	ret = recvmsg(sd, message, 0);
 
-	err = -(ret != sizeof(*response)
-		|| response->icmp_header.type != ICMP_ECHOREPLY
-		|| response->ip_header.saddr != addr->sin_addr.s_addr);
+	status = ret != sizeof(*response);
 
-	if (!err)
-		socket_packet_stat(message, timestamp, &response->ip_header.ttl);
-
-	return err;
-}
-
-int			icmp_echo(icmp_echo_stats *stats, const struct sockaddr_in *addr,
-	int sd, uint16_t id, uint16_t sequence)
-{
-	static icmp_packet		request;
-	static icmp_packet		response;
-	static struct timeval	receive_time;
-	float					time;
-	int						err;
-
-	err = icmp_echo_send(addr, sd, id, sequence, &stats->last_send_time);
-	if (!err)
+	if (status == 0)
 	{
-		/*
-		fprintf(stderr, "Sent icmp echo request to %s: icmp_seq=%hu\n",
-			inet_ntoa(addr->sin_addr), sequence);
-		*/
-		++(stats->transmitted);
-
-		err = icmp_echo_recv(addr, sd, &request, &response, &receive_time);
-		if (!err)
-		{
-			/*
-			fprintf(stderr, "Received icmp echo response from %s: icmp_seq=%hu\n",
-				inet_ntoa(addr->sin_addr), ntohs(response.icmp_header.un.echo.sequence));
-			*/
-			time = TV_DIFF_MS(stats->last_send_time, receive_time);
-
-			printf("%zu bytes from %s (%s): icmp_seq=%hu ttl=%hu time=%.1lf ms\n",
-				sizeof(response.icmp_header) + sizeof(response.payload),
-				stats->host_name, stats->host_presentation,
-				ntohs(response.icmp_header.un.echo.sequence),
-				response.ip_header.ttl,
-				time
-			);
-
-			stats->time_sum_ms += time;
-			stats->time_sum_ms_sq += time * time;
-
-			if (time < stats->min_time_ms)
-				stats->min_time_ms = time;
-
-			if (time > stats->max_time_ms)
-				stats->max_time_ms = time;
-
-			++(stats->received);
-		}
-		else if (errno == EAGAIN || errno == EWOULDBLOCK)
-		{
-			//fprintf(stderr, "Timed out while waiting for response\n");
-		}
+		if (response->icmp_header.type == ICMP_ECHOREPLY
+			&& response->ip_header.saddr == addr->sin_addr.s_addr)
+			socket_packet_stat(message, time, &response->ip_header.ttl);
 		else
-			perror("recvmsg");
+		{
+			status = ICMP_ECHO_ERECV;
+
+			if (response->icmp_header.type == ICMP_TIME_EXCEEDED)
+				status |= ICMP_ECHO_ETIMEO;
+		}
 	}
 	else
-		perror(inet_ntoa(addr->sin_addr));
+	{
+		status = ICMP_ECHO_ERECV;
 
-	return err;
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			status |= ICMP_ECHO_ETIMEO;
+	}
+
+	return status;
+}
+
+int			icmp_echo_raw(int sd, const icmp_echo_params *params,
+	icmp_packet *response, struct timeval t[2])
+{
+	int	status;
+
+	status = icmp_echo_send(sd, params, &t[0]);
+
+	if (status == 0)
+		status = icmp_echo_recv(sd, params->destination, response, &t[1]);
+
+	return status;
 }
