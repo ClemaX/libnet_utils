@@ -8,15 +8,13 @@
 
 #include <socket_utils.h>
 
-int	socket_icmp(int *socket_type)
+int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 {
 	const int	opt_true = 1;
-#if SOCKET_ICMP_USE_DGRAM
-	const int	ttl = 64;
-	const int	tos = 0;
-#endif
 	int			sd;
 	int			setsockopt_err;
+	(void)		ttl;
+	(void)		tos;
 
 	sd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 

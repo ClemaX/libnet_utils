@@ -23,10 +23,15 @@ typedef struct					icmp_packet
 
 typedef struct	icmp_echo_params
 {
+	const struct sockaddr_in	*destination;
+	uint64_t					count;
+	float						interval_s;
+	int							socket_type;
+	int							options;
 	uint16_t					id;
 	uint16_t					sequence;
 	uint8_t						time_to_live;
-	const struct sockaddr_in	*destination;
+	uint8_t						type_of_service;
 }				icmp_echo_params;
 
 icmp_packet		*icmp_echo_request(const struct icmp_echo_params *params);

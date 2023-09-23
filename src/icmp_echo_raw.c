@@ -61,6 +61,12 @@ static int	icmp_echo_recv(int sd, const struct sockaddr_in *addr,
 
 	status = ret != sizeof(*response);
 
+	if (status == 0 && response->icmp_header.type == ICMP_ECHO)
+	{
+		ret = recvmsg(sd, message, 0);
+		status = ret != sizeof(*response);
+	}
+
 	if (status == 0)
 	{
 		if (response->icmp_header.type == ICMP_ECHOREPLY

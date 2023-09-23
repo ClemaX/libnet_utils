@@ -13,7 +13,7 @@ typedef int (icmp_echo_fun(int sd, const icmp_echo_params *params,
 	icmp_packet *response, struct timeval t[2]));
 
 
-int			icmp_echo(int sd, int socket_type, const icmp_echo_params *params,
+int			icmp_echo(int sd, const icmp_echo_params *params,
 	icmp_packet *response, struct timeval t[2]);
 
 int			icmp_echo_raw(int sd, const icmp_echo_params *params,

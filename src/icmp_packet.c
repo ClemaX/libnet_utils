@@ -34,6 +34,7 @@ icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params)
 
 	packet.ip_header.frag_off = htons(0 | IP_DF);
 	packet.ip_header.ttl = params->time_to_live;
+	packet.ip_header.tos = params->type_of_service;
 
 	packet.icmp_header.un.echo.id = htons(params->id);
 	packet.icmp_header.un.echo.sequence = htons(params->sequence);

@@ -6,7 +6,7 @@
 
 # define SOCKET_ICMP_USE_DGRAM 1
 
-int				socket_icmp(int *socket_type);
+int				socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos);
 
 struct msghdr	*socket_msghdr(struct sockaddr_in *src_addr,
 	struct iovec *frames, size_t frame_count);
