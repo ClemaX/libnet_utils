@@ -22,8 +22,8 @@ static int	icmp_echo_send(int sd, const icmp_echo_params *params,
 	gettimeofday(time, NULL);
 
 	ret = sendto(sd, request, sizeof(*request), 0,
-		(const struct sockaddr*)params->destination,
-		sizeof(*params->destination));
+		(const struct sockaddr*)&params->destination,
+		sizeof(params->destination));
 
 	status = ret == -1;
 
@@ -66,6 +66,7 @@ static int	icmp_echo_recv(int sd, const struct sockaddr_in *addr,
 		ret = recvmsg(sd, message, 0);
 		status = ret != sizeof(*response);
 	}
+	// TODO: Add common echo response->icmp_header.type error mapper
 
 	if (status == 0)
 	{
@@ -99,7 +100,7 @@ int			icmp_echo_raw(int sd, const icmp_echo_params *params,
 	status = icmp_echo_send(sd, params, &t[0]);
 
 	if (status == 0)
-		status = icmp_echo_recv(sd, params->destination, response, &t[1]);
+		status = icmp_echo_recv(sd, &params->destination, response, &t[1]);
 
 	return status;
 }

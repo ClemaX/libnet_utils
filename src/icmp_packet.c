@@ -30,7 +30,7 @@ icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params)
 		.payload = ICMP_ECHO_PAYLOAD,
 	};
 
-	packet.ip_header.daddr = params->destination->sin_addr.s_addr;
+	packet.ip_header.daddr = params->destination.sin_addr.s_addr;
 
 	packet.ip_header.frag_off = htons(0 | IP_DF);
 	packet.ip_header.ttl = params->time_to_live;
