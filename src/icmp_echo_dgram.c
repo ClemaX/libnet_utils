@@ -37,8 +37,7 @@ static int	icmp_echo_send(int sd, const icmp_echo_params *params,
 	return status;
 }
 
-static int	icmp_echo_recv(int sd, const struct sockaddr_in *addr,
-	struct icmp_packet *response, struct timeval *time)
+static int	icmp_echo_recv(int sd, struct icmp_packet *response, struct timeval *time)
 {
 	static struct sockaddr_in	src_addr;
 	static struct iovec			frames[] =
@@ -50,27 +49,18 @@ static int	icmp_echo_recv(int sd, const struct sockaddr_in *addr,
 		sizeof(frames) / sizeof(*frames));
 	ssize_t						ret;
 	int							status;
-	(void)						addr;
 
 	frames[0].iov_base = &response->icmp_header;
 	frames[1].iov_base = &response->payload;
 
 	ret = recvmsg(sd, message, 0);
 
-	status = ret != sizeof(*response) - sizeof(response->ip_header)
-	|| response->icmp_header.type != ICMP_ECHOREPLY;
+	status = ret != sizeof(*response) - sizeof(response->ip_header);
 
-	// TODO: Add common echo response->icmp_header.type error mapper
+	status = icmp_echo_error(status, response->icmp_header);
 
 	if (status == 0)
 		socket_packet_stat(message, time, &response->ip_header.ttl);
-	else
-	{
-		status = ICMP_ECHO_ERECV;
-
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			status |= ICMP_ECHO_ETIMEO;
-	}
 
 	return status;
 }
@@ -83,7 +73,7 @@ int			icmp_echo_dgram(int sd, const icmp_echo_params *params,
 	status = icmp_echo_send(sd, params, &t[0]);
 
 	if (status == 0)
-		status = icmp_echo_recv(sd, &params->destination, response, &t[1]);
+		status = icmp_echo_recv(sd, response, &t[1]);
 
 	return status;
 }
