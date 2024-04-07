@@ -31,7 +31,7 @@ static int icmp_echo_response_validate(const icmp_header header) {
 
 	int	status;
 
-	status = header.type == ICMP_ECHOREPLY;
+	status = header.type != ICMP_ECHOREPLY;
 
 	if (status != 0) {
 		status = status_map[header.type];
