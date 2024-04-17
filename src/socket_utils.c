@@ -86,7 +86,9 @@ void	socket_packet_stat(struct msghdr *message,
 	struct timeval *timestamp, uint8_t *ttl)
 {
 	*timestamp = (struct timeval){0, 0};
-	*ttl = 0;
+	
+	if (ttl != NULL)
+		*ttl = 0;
 
 	for (struct cmsghdr *cframe = CMSG_FIRSTHDR(message); cframe != NULL;
 		cframe = CMSG_NXTHDR(message, cframe))
@@ -100,7 +102,7 @@ void	socket_packet_stat(struct msghdr *message,
 				break;
 
 			case SOL_IP:
-				if (cframe->cmsg_type == IP_TTL)
+				if (cframe->cmsg_type == IP_TTL && ttl != NULL)
 					*ttl = *(uint8_t*)CMSG_DATA(cframe);
 
 				break;

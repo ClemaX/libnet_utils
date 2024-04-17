@@ -69,7 +69,7 @@ static int	icmp_echo_recv(int sd, struct icmp_packet *response, struct timeval *
 	status = icmp_echo_error(status, response->icmp_header);
 
 	if (status == 0)
-		socket_packet_stat(message, time, &response->ip_header.ttl);
+		socket_packet_stat(message, time, NULL);
 
 	return status;
 }
