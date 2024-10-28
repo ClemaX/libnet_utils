@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-int16_t	ip_checksum(const void *data, size_t size);
+int16_t	ip_checksum(const void *data, size_t len);
 
 int		ip_packet();
 

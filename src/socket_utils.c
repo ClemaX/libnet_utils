@@ -1,10 +1,6 @@
-#include <netinet/in.h>
 #include <stdio.h>
-#include <sys/socket.h>
 #include <unistd.h>
-#include <errno.h>
 
-#include <netinet/ip.h>
 
 #include <socket_utils.h>
 
@@ -20,13 +16,21 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 
 	if (sd != -1)
 	{
+		*socket_type = SOCK_RAW;
+
 		setsockopt_err = setsockopt(sd, IPPROTO_IP, IP_HDRINCL,
 			&opt_true, sizeof(opt_true));
 
 		if (!setsockopt_err)
 			*socket_type = SOCK_RAW;
+		else
+		{
+			close(sd);
+			sd = -1;
+		}
 	}
-	else
+
+	if (sd == -1)
 	{
 #if SOCKET_ICMP_USE_DGRAM
 		sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
@@ -55,11 +59,13 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 
 		if (setsockopt_err)
 		{
-			perror("setsockopt");
 			close(sd);
 			sd = -1;
 		}
 	}
+
+	if (setsockopt_err)
+		perror("setsockopt");
 
 	return sd;
 }
@@ -86,7 +92,7 @@ void	socket_packet_stat(struct msghdr *message,
 	struct timeval *timestamp, uint8_t *ttl)
 {
 	*timestamp = (struct timeval){0, 0};
-	
+
 	if (ttl != NULL)
 		*ttl = 0;
 

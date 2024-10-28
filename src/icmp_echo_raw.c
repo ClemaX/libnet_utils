@@ -1,26 +1,18 @@
-#include <sys/time.h>
-
-#include <stdio.h>
 #include <errno.h>
-
-#include <netinet/in.h>
 
 #include <socket_utils.h>
 #include <icmp_echo.h>
-#include <time_utils.h>
 
-
-static int	icmp_echo_send(int sd, const icmp_echo_params *params,
-	struct timeval *time)
+int	icmp_echo_raw_send(int sd, const icmp_echo_params *params,
+	uint16_t sequence, struct timeval *time)
 {
-	icmp_packet	*request;
-	ssize_t		ret;
-	int			status;
+	const icmp_packet	*request;
+	ssize_t				ret;
+	int					status;
 
-	request = icmp_echo_request(params);
+	request = icmp_echo_request(params, sequence);
 
 	gettimeofday(time, NULL);
-
 	ret = sendto(sd, request, sizeof(*request), 0,
 		(const struct sockaddr*)&params->destination,
 		sizeof(params->destination));
@@ -38,7 +30,7 @@ static int	icmp_echo_send(int sd, const icmp_echo_params *params,
 	return status;
 }
 
-static int	icmp_echo_recv(int sd, struct icmp_packet *response, struct timeval *time)
+int	icmp_echo_raw_recv(int sd, struct icmp_packet *response, struct timeval *time)
 {
 	static struct sockaddr_in	src_addr;
 	static struct iovec			frames[] =
@@ -56,33 +48,14 @@ static int	icmp_echo_recv(int sd, struct icmp_packet *response, struct timeval *
 	frames[1].iov_base = &response->icmp_header;
 	frames[2].iov_base = &response->payload;
 
-	ret = recvmsg(sd, message, 0);
+	do {
+		ret = recvmsg(sd, message, 0);
+	} while (ret == -1 && errno == EAGAIN);
 
 	status = ret != sizeof(*response);
 
-	if (status == 0 && response->icmp_header.type == ICMP_ECHO)
-	{
-		ret = recvmsg(sd, message, 0);
-		status = ret != sizeof(*response);
-	}
-
-	status = icmp_echo_error(status, response->icmp_header);
-
 	if (status == 0)
 		socket_packet_stat(message, time, NULL);
-
-	return status;
-}
-
-int			icmp_echo_raw(int sd, const icmp_echo_params *params,
-	icmp_packet *response, struct timeval t[2])
-{
-	int	status;
-
-	status = icmp_echo_send(sd, params, &t[0]);
-
-	if (status == 0)
-		status = icmp_echo_recv(sd, response, &t[1]);
 
 	return status;
 }

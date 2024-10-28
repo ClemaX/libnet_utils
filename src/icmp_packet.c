@@ -1,13 +1,6 @@
-#include <endian.h>
-#include <netinet/ip.h>
-#include <stdint.h>
-#include <string.h>
-
-#include <netinet/in.h>
-
 #include <icmp_packet.h>
 
-icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params)
+icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint16_t sequence)
 {
 	static icmp_packet	packet =
 	{
@@ -37,7 +30,7 @@ icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params)
 	packet.ip_header.tos = params->type_of_service;
 
 	packet.icmp_header.un.echo.id = htons(params->id);
-	packet.icmp_header.un.echo.sequence = htons(params->sequence);
+	packet.icmp_header.un.echo.sequence = htons(sequence);
 
 	packet.icmp_header.checksum = 0;
 	packet.icmp_header.checksum = ip_checksum(&packet.icmp_header,
