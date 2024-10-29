@@ -1,5 +1,3 @@
-#include <errno.h>
-
 #include <socket_utils.h>
 #include <icmp_echo.h>
 
@@ -18,14 +16,6 @@ int	icmp_echo_raw_send(int sd, const icmp_echo_params *params,
 		sizeof(params->destination));
 
 	status = ret == -1;
-
-	if (status != 0)
-	{
-		status = ICMP_ECHO_ESEND;
-
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			status |= ICMP_ECHO_ETIMEO;
-	}
 
 	return status;
 }
@@ -48,9 +38,7 @@ int	icmp_echo_raw_recv(int sd, struct icmp_packet *response, struct timeval *tim
 	frames[1].iov_base = &response->icmp_header;
 	frames[2].iov_base = &response->payload;
 
-	do {
-		ret = recvmsg(sd, message, 0);
-	} while (ret == -1 && errno == EAGAIN);
+	ret = recvmsg(sd, message, 0);
 
 	status = ret != sizeof(*response);
 

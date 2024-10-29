@@ -1,9 +1,7 @@
-#include <errno.h>
-
 #include <socket_utils.h>
 #include <icmp_echo.h>
 
-static int	icmp_echo_recv_error(void)
+/* static int	icmp_echo_recv_error(void)
 {
 	int	status;
 
@@ -16,31 +14,14 @@ static int	icmp_echo_recv_error(void)
 		status |= ICMP_ECHO_EDEST_UNREACH;
 
 	return status;
-}
+} */
 
-static int	icmp_echo_validate_type(const icmp_packet *packet, uint16_t type)
+/* static int	icmp_echo_validate_type(const icmp_packet *packet, uint16_t type)
 {
-	static const int	status_map[NR_ICMP_TYPES] = {
-		[ICMP_DEST_UNREACH] = ICMP_ECHO_EDEST_UNREACH,
-		[ICMP_SOURCE_QUENCH] = ICMP_ECHO_EDEST_UNREACH,
-		[ICMP_REDIRECT] = ICMP_ECHO_EREDIRECT,
-	};
-	int	status;
 
-	status = packet->icmp_header.type != type;
+} */
 
-	if (status != 0)
-	{
-		dprintf(2, "Invalid header type %d!", packet->icmp_header.type);
-		status = status_map[packet->icmp_header.type];
-
-		status |= ICMP_ECHO_ETIMEO;
-	}
-
-	return status;
-}
-
-static int	icmp_echo_response_validate(const icmp_packet *response)
+/* static int	icmp_echo_response_validate(const icmp_packet *response)
 {
 	int status;
 
@@ -52,7 +33,7 @@ static int	icmp_echo_response_validate(const icmp_packet *response)
 	}
 
 	return status;
-}
+} */
 
 int			icmp_echo_send(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time)
@@ -75,8 +56,8 @@ int			icmp_echo_send(int sd, const icmp_echo_params *params,
 int			icmp_echo_recv(int sd, const icmp_echo_params *params,
 	struct icmp_packet *response, struct timeval *time)
 {
-	int status;
-	icmp_echo_recv_fun *recv_fun;
+	icmp_echo_recv_fun	*recv_fun;
+	int					status;
 
 #if SOCKET_ICMP_USE_DGRAM
 	if (params->socket_type == SOCK_RAW)
@@ -84,24 +65,15 @@ int			icmp_echo_recv(int sd, const icmp_echo_params *params,
 	else
 		recv_fun = icmp_echo_dgram_recv;
 #else
-	(void)socket_type;
+	(void)params;
 	recv_fun = icmp_echo_raw;
 #endif
 
-	do {
-		status = recv_fun(sd, response, time);
+	status = recv_fun(sd, response, time);
 
-		if (status != 0)
-			status = icmp_echo_recv_error();
-		else
-			status = icmp_echo_response_validate(response);
-		// TODO: Maybe need to verify src_addr
-	}
-	while (status == 0
-#if SOCKET_ICMP_USE_DGRAM
-		&& params->socket_type == SOCK_RAW
-#endif
-		&& htons(response->icmp_header.un.echo.id) != params->id);
+	if (ip_checksum(&response->icmp_header,
+		sizeof(response->icmp_header) + sizeof(response->payload)) != 0)
+		status = ICMP_ECHO_ECHECKSUM;
 
 	return status;
 }

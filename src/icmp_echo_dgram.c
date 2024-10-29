@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <strings.h>
 
 #include <socket_utils.h>
@@ -21,14 +20,6 @@ int	icmp_echo_dgram_send(int sd, const icmp_echo_params *params,
 
 	status = ret == -1;
 
-	if (status != 0)
-	{
-		status = ICMP_ECHO_ESEND;
-
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			status |= ICMP_ECHO_ETIMEO;
-	}
-
 	return status;
 }
 
@@ -50,9 +41,7 @@ int	icmp_echo_dgram_recv(int sd, struct icmp_packet *response, struct timeval *t
 
 	bzero(&response->ip_header, sizeof(response->ip_header));
 
-	do {
-		ret = recvmsg(sd, message, 0);
-	} while (ret == -1 && errno == EAGAIN);
+	ret = recvmsg(sd, message, 0);
 
 	status = ret != sizeof(*response) - sizeof(response->ip_header);
 

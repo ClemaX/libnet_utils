@@ -91,7 +91,8 @@ struct msghdr *socket_msghdr(struct sockaddr_in *src_addr,
 void	socket_packet_stat(struct msghdr *message,
 	struct timeval *timestamp, uint8_t *ttl)
 {
-	*timestamp = (struct timeval){0, 0};
+	if (timestamp != NULL)
+		*timestamp = (struct timeval){0, 0};
 
 	if (ttl != NULL)
 		*ttl = 0;
@@ -102,7 +103,7 @@ void	socket_packet_stat(struct msghdr *message,
 		switch (cframe->cmsg_level)
 		{
 			case SOL_SOCKET:
-				if (cframe->cmsg_type == SO_TIMESTAMP)
+				if (cframe->cmsg_type == SO_TIMESTAMP && timestamp != NULL)
 					*timestamp = *(struct timeval *)CMSG_DATA(cframe);
 
 				break;

@@ -12,6 +12,7 @@
 # define ICMP_ECHO_ESOURCE_QUENCH	0b00010000
 # define ICMP_ECHO_EREDIRECT		0b00100000
 # define ICMP_ECHO_ECHECKSUM		0b01000000
+# define ICMP_ECHO_EINTR			0b10000000
 
 typedef int (icmp_echo_send_fun(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time));
