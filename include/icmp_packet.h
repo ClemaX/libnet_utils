@@ -38,6 +38,7 @@ typedef struct					icmp_response_packet
 		uint8_t						echo[56];
 		icmp_dest_unreach_payload	dest_unreach;
 	}			payload;
+	size_t		size;
 }	__attribute__((__packed__))	icmp_response_packet;
 
 typedef struct	icmp_echo_params

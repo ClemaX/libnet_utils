@@ -23,7 +23,7 @@ int	icmp_echo_dgram_send(int sd, const icmp_echo_params *params,
 	return status;
 }
 
-int	icmp_echo_dgram_recv(int sd, struct icmp_response_packet *response, size_t *size,
+int	icmp_echo_dgram_recv(int sd, struct icmp_response_packet *response,
 	struct timeval *time)
 {
 	static struct sockaddr_in	src_addr;
@@ -48,9 +48,11 @@ int	icmp_echo_dgram_recv(int sd, struct icmp_response_packet *response, size_t *
 
 	if (status == 0)
 	{
-		*size = ret;
+		response->size = ret;
 		socket_packet_stat(message, time, &response->ip_header.ttl);
 	}
+	else
+		response->size = 0;
 
 	return status;
 }

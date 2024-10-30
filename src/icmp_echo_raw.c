@@ -23,7 +23,7 @@ int	icmp_echo_raw_send(int sd, const icmp_echo_params *params,
 }
 
 int	icmp_echo_raw_recv(int sd, icmp_response_packet *response,
-	size_t *size, struct timeval *time)
+	struct timeval *time)
 {
 	static struct sockaddr_in	src_addr;
 	static struct iovec			frames[] =
@@ -50,9 +50,11 @@ int	icmp_echo_raw_recv(int sd, icmp_response_packet *response,
 
 	if (status == 0)
 	{
-		*size = ret - sizeof(response->ip_header);
+		response->size = ret - sizeof(response->ip_header);
 		socket_packet_stat(message, time, NULL);
 	}
+	else
+		response->size = 0;
 
 	return status;
 }

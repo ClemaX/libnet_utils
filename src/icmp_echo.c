@@ -45,8 +45,7 @@ int	icmp_echo_send(int sd, const icmp_echo_params *params,
 }
 
 int	icmp_echo_recv(int sd, const icmp_echo_params *params,
-	icmp_response_packet *response, size_t *size,
-	struct timeval *time)
+	icmp_response_packet *response, struct timeval *time)
 {
 	icmp_echo_recv_fun	*recv_fun;
 	int					status;
@@ -61,7 +60,7 @@ int	icmp_echo_recv(int sd, const icmp_echo_params *params,
 	recv_fun = icmp_echo_raw;
 #endif
 
-	status = recv_fun(sd, response, size, time);
+	status = recv_fun(sd, response, time);
 
 	if (status == 0)
 	{
@@ -71,7 +70,7 @@ int	icmp_echo_recv(int sd, const icmp_echo_params *params,
 			? sizeof(response->icmp_header) + sizeof(response->payload.echo)
 			: sizeof(response->icmp_header);
 
-		if (*size < checksum_size
+		if (response->size < checksum_size
 			|| ip_checksum(&response->icmp_header, checksum_size) != 0)
 			status = ICMP_ECHO_ECHECKSUM;
 	}
