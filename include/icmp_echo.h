@@ -5,14 +5,16 @@
 
 # include <icmp_packet.h>
 
+/// Send error
 # define ICMP_ECHO_ESEND			0b00000001
+/// Receive error
 # define ICMP_ECHO_ERECV			0b00000010
+/// Time out
 # define ICMP_ECHO_ETIMEO			0b00000100
-# define ICMP_ECHO_EDEST_UNREACH	0b00001000
-# define ICMP_ECHO_ESOURCE_QUENCH	0b00010000
-# define ICMP_ECHO_EREDIRECT		0b00100000
-# define ICMP_ECHO_ECHECKSUM		0b01000000
-# define ICMP_ECHO_EINTR			0b10000000
+/// Invalid checksum
+# define ICMP_ECHO_ECHECKSUM		0b00001000
+/// Interruption
+# define ICMP_ECHO_EINTR			0b00010000
 
 typedef int (icmp_echo_send_fun(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time));

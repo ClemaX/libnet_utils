@@ -32,7 +32,11 @@ typedef struct	icmp_echo_params
 	uint8_t				type_of_service;
 }				icmp_echo_params;
 
-icmp_packet		*icmp_echo_request(const struct icmp_echo_params *params, uint16_t sequence);
-void			icmp_echo_dump(FILE *file, const icmp_packet *packet, bool dump_ip_header);
+icmp_packet		*icmp_echo_request(const struct icmp_echo_params *params,
+	uint16_t sequence);
+void			icmp_echo_dump(FILE *file, const icmp_packet *packet,
+	bool dump_ip_header);
+
+const char		*icmp_type_strerror(uint8_t type);
 
 #endif

@@ -43,7 +43,7 @@ int	icmp_echo_dgram_recv(int sd, struct icmp_packet *response, struct timeval *t
 
 	ret = recvmsg(sd, message, 0);
 
-	status = ret != sizeof(*response) - sizeof(response->ip_header);
+	status = ret == -1;
 
 	if (status == 0)
 		socket_packet_stat(message, time, &response->ip_header.ttl);

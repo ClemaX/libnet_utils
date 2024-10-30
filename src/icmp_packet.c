@@ -38,3 +38,16 @@ icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint16_t s
 
 	return &packet;
 }
+
+const char	*icmp_type_strerror(uint8_t type)
+{
+	const char	*type_strs[NR_ICMP_TYPES] = {
+		[ICMP_DEST_UNREACH] = "Destination unreachable",
+		[ICMP_SOURCE_QUENCH] = "Source quench",
+		[ICMP_REDIRECT] = "Redirect (change route)",
+		[ICMP_TIME_EXCEEDED] = "Time to live exceeded",
+		[ICMP_PARAMETERPROB] = "Parameter problem"
+	};
+
+	return type_strs[type];
+}

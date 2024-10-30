@@ -1,3 +1,5 @@
+#include <errno.h>
+
 #include <socket_utils.h>
 #include <icmp_echo.h>
 
@@ -38,9 +40,12 @@ int	icmp_echo_raw_recv(int sd, struct icmp_packet *response, struct timeval *tim
 	frames[1].iov_base = &response->icmp_header;
 	frames[2].iov_base = &response->payload;
 
-	ret = recvmsg(sd, message, 0);
+	do {
+		ret = recvmsg(sd, message, 0);
+	} while (ret == -1
+		&& errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR);
 
-	status = ret != sizeof(*response);
+	status = ret == -1;
 
 	if (status == 0)
 		socket_packet_stat(message, time, NULL);

@@ -18,8 +18,10 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 	{
 		*socket_type = SOCK_RAW;
 
-		setsockopt_err = setsockopt(sd, IPPROTO_IP, IP_HDRINCL,
-			&opt_true, sizeof(opt_true));
+		setsockopt_err =
+			setsockopt(sd, IPPROTO_IP, IP_HDRINCL,
+				&opt_true, sizeof(opt_true))
+			||	setsockopt(sd, IPPROTO_IP, IP_RECVERR, &opt_true, sizeof(opt_true));
 
 		if (!setsockopt_err)
 			*socket_type = SOCK_RAW;

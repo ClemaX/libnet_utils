@@ -1,6 +1,6 @@
 #include <ip_utils.h>
 
-int16_t			ip_checksum(const void *data, size_t size)
+uint16_t			ip_checksum(const void *data, size_t size)
 {
 	uint32_t	sum = 0;
 
@@ -13,7 +13,7 @@ int16_t			ip_checksum(const void *data, size_t size)
 	sum = (sum >> 16) + (sum & 0xFFFF);
 	sum += (sum >> 16);
 
-	return (int16_t)~sum;
+	return ~sum;
 }
 
 int				ip_host_address(struct addrinfo **address,
