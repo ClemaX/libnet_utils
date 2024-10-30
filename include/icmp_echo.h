@@ -18,19 +18,23 @@
 
 typedef int (icmp_echo_send_fun(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time));
-typedef int (icmp_echo_recv_fun(int sd, struct icmp_packet *response, struct timeval *time));
+typedef int (icmp_echo_recv_fun(int sd, icmp_response_packet *response,
+	size_t *size, struct timeval *time));
 
 int			icmp_echo_send(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time);
-int			icmp_echo_recv(int sd, const icmp_echo_params *params, struct icmp_packet *response,
+int			icmp_echo_recv(int sd, const icmp_echo_params *params,
+	icmp_response_packet *response, size_t *response_size,
 	struct timeval *time);
 
 int			icmp_echo_raw_send(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time);
-int			icmp_echo_raw_recv(int sd, struct icmp_packet *response, struct timeval *time);
+int			icmp_echo_raw_recv(int sd, icmp_response_packet *response,
+	size_t *size, struct timeval *time);
 
 int			icmp_echo_dgram_send(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time);
-int			icmp_echo_dgram_recv(int sd, struct icmp_packet *response, struct timeval *time);
+int			icmp_echo_dgram_recv(int sd, icmp_response_packet *response,
+	size_t *size, struct timeval *time);
 
 #endif

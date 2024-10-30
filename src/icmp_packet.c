@@ -1,15 +1,15 @@
 #include <icmp_packet.h>
 
-icmp_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint16_t sequence)
+icmp_echo_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint16_t sequence)
 {
-	static icmp_packet	packet =
+	static icmp_echo_packet	packet =
 	{
 		.ip_header =
 		{
 			.version = 4,
 			.ihl = sizeof(packet.ip_header) / 4,
 			.tos = 0,
-			.tot_len = sizeof(icmp_packet),
+			.tot_len = sizeof(icmp_echo_packet),
 			.id = 0,
 			.frag_off = 0,
 			.ttl = 64,
