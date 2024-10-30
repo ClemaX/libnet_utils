@@ -70,9 +70,8 @@ int	icmp_echo_recv(int sd, const icmp_echo_params *params,
 			? sizeof(response->icmp_header) + sizeof(response->payload.echo)
 			: sizeof(response->icmp_header);
 
-		if (response->size < checksum_size
-			|| ip_checksum(&response->icmp_header, checksum_size) != 0)
-			status = ICMP_ECHO_ECHECKSUM;
+		response->is_valid = response->size >= checksum_size
+			&& ip_checksum(&response->icmp_header, checksum_size) == 0;
 	}
 	else
 	{

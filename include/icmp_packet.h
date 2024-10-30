@@ -24,21 +24,22 @@ typedef struct					icmp_echo_packet
 }	__attribute__((__packed__))	icmp_echo_packet;
 
 
-typedef struct					icmp_dest_unreach_payload
+typedef struct					icmp_error_payload
 {
 	ip_header	ip_header;
 	uint8_t		data[64];
-}	__attribute__((__packed__))	icmp_dest_unreach_payload;
+}	__attribute__((__packed__))	icmp_error_payload;
 
 typedef struct					icmp_response_packet
 {
 	ip_header	ip_header;
 	icmp_header	icmp_header;
 	union {
-		uint8_t						echo[56];
-		icmp_dest_unreach_payload	dest_unreach;
+		uint8_t				echo[56];
+		icmp_error_payload	error;
 	}			payload;
 	size_t		size;
+	bool		is_valid;
 }	__attribute__((__packed__))	icmp_response_packet;
 
 typedef struct	icmp_echo_params

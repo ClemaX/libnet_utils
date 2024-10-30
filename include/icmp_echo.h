@@ -11,10 +11,8 @@
 # define ICMP_ECHO_ERECV			0b00000010
 /// Time out
 # define ICMP_ECHO_ETIMEO			0b00000100
-/// Invalid checksum
-# define ICMP_ECHO_ECHECKSUM		0b00001000
 /// Interruption
-# define ICMP_ECHO_EINTR			0b00010000
+# define ICMP_ECHO_EINTR			0b00001000
 
 typedef int (icmp_echo_send_fun(int sd, const icmp_echo_params *params,
 	uint16_t sequence, struct timeval *time));
