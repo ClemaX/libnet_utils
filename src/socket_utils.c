@@ -6,7 +6,7 @@
 
 int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 {
-	const int	opt_true = 1;
+	const int	on = 1;
 	int			sd;
 	int			setsockopt_err;
 	(void)		ttl;
@@ -19,9 +19,8 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 		*socket_type = SOCK_RAW;
 
 		setsockopt_err =
-			setsockopt(sd, IPPROTO_IP, IP_HDRINCL,
-				&opt_true, sizeof(opt_true))
-			||	setsockopt(sd, IPPROTO_IP, IP_RECVERR, &opt_true, sizeof(opt_true));
+			setsockopt(sd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on))
+			||	setsockopt(sd, IPPROTO_IP, IP_RECVERR, &on, sizeof(on));
 
 		if (!setsockopt_err)
 			*socket_type = SOCK_RAW;
@@ -43,7 +42,7 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 				setsockopt(sd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl))
 			||	setsockopt(sd, IPPROTO_IP, IP_TOS, &tos, sizeof(tos))
 			||	setsockopt(sd, IPPROTO_IP, IP_RECVTTL,
-					&opt_true, sizeof(opt_true));
+					&on, sizeof(on));
 
 			if (!setsockopt_err)
 				*socket_type = SOCK_DGRAM;
@@ -57,7 +56,7 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 	{
 		if (!setsockopt_err)
 			setsockopt_err = setsockopt(sd, SOL_SOCKET, SO_TIMESTAMP,
-				&opt_true, sizeof(opt_true));
+				&on, sizeof(on));
 
 		if (setsockopt_err)
 		{
