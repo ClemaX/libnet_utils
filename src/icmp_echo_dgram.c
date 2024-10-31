@@ -49,6 +49,7 @@ int	icmp_echo_dgram_recv(int sd, struct icmp_response_packet *response,
 	if (status == 0)
 	{
 		response->size = ret;
+		response->ip_header.saddr = src_addr.sin_addr.s_addr;
 		socket_packet_stat(message, time, &response->ip_header.ttl);
 	}
 	else
