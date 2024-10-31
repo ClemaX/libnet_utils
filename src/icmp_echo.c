@@ -20,11 +20,13 @@ static inline int		icmp_echo_recv_error(int error)
 	return status;
 }
 
-int	icmp_echo_send(int sd, const icmp_echo_params *params,
-	uint16_t sequence, struct timeval *time)
+int	icmp_echo_send(int sd, const struct sockaddr_in *destination,
+	const icmp_echo_params *params, uint16_t sequence, struct timeval *time)
 {
-  icmp_echo_send_fun	*send_fun;
-  int					status;
+	icmp_echo_packet	*const request =
+		icmp_echo_request(destination, params, sequence);
+	icmp_echo_send_fun	*send_fun;
+	int					status;
 
 #if SOCKET_ICMP_USE_DGRAM
 	if (params->socket_type == SOCK_RAW)
@@ -36,7 +38,7 @@ int	icmp_echo_send(int sd, const icmp_echo_params *params,
 	send_fun = icmp_echo_raw;
 #endif
 
-	status = send_fun(sd, params, sequence, time);
+	status = send_fun(sd, destination, request, time);
 
 	if (status != 0)
 		status = ICMP_ECHO_ESEND;

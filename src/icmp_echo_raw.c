@@ -3,19 +3,15 @@
 #include <socket_utils.h>
 #include <icmp_echo.h>
 
-int	icmp_echo_raw_send(int sd, const icmp_echo_params *params,
-	uint16_t sequence, struct timeval *time)
+int	icmp_echo_raw_send(int sd, const struct sockaddr_in *destination,
+	const icmp_echo_packet *request, struct timeval *time)
 {
-	const icmp_echo_packet	*request;
 	ssize_t				ret;
 	int					status;
 
-	request = icmp_echo_request(params, sequence);
-
 	gettimeofday(time, NULL);
 	ret = sendto(sd, request, sizeof(*request), 0,
-		(const struct sockaddr*)&params->destination,
-		sizeof(params->destination));
+		(const struct sockaddr*)destination, sizeof(*destination));
 
 	status = ret == -1;
 

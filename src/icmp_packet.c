@@ -1,6 +1,7 @@
 #include <icmp_packet.h>
 
-icmp_echo_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint16_t sequence)
+icmp_echo_packet	*icmp_echo_request(const struct sockaddr_in *destination,
+	const icmp_echo_params *params, uint16_t sequence)
 {
 	static icmp_echo_packet	packet =
 	{
@@ -24,7 +25,7 @@ icmp_echo_packet	*icmp_echo_request(const struct icmp_echo_params *params, uint1
 		.payload = ICMP_ECHO_PAYLOAD,
 	};
 
-	packet.ip_header.daddr = params->destination.sin_addr.s_addr;
+	packet.ip_header.daddr = destination->sin_addr.s_addr;
 
 	packet.ip_header.frag_off = htons(0 | IP_DF);
 	packet.ip_header.ttl = params->time_to_live;
