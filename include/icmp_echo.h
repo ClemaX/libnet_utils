@@ -21,7 +21,7 @@ typedef int (icmp_echo_recv_fun(int sd, icmp_response_packet *response,
 
 int			icmp_echo_send(int sd, const struct sockaddr_in *destination,
 	const icmp_echo_params *params, uint16_t sequence, struct timeval *time);
-int			icmp_echo_recv(int sd, const icmp_echo_params *params,
+int			icmp_echo_recv(int sd, int socket_type,
 	icmp_response_packet *response, struct timeval *time);
 
 

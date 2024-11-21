@@ -46,19 +46,19 @@ int	icmp_echo_send(int sd, const struct sockaddr_in *destination,
 	return status;
 }
 
-int	icmp_echo_recv(int sd, const icmp_echo_params *params,
+int	icmp_echo_recv(int sd, int socket_type,
 	icmp_response_packet *response, struct timeval *time)
 {
 	icmp_echo_recv_fun	*recv_fun;
 	int					status;
 
 #if SOCKET_ICMP_USE_DGRAM
-	if (params->socket_type == SOCK_RAW)
+	if (socket_type == SOCK_RAW)
 		recv_fun = icmp_echo_raw_recv;
 	else
 		recv_fun = icmp_echo_dgram_recv;
 #else
-	(void)params;
+	(void)socket_type;
 	recv_fun = icmp_echo_raw;
 #endif
 
