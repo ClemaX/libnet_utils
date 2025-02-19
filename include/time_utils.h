@@ -14,4 +14,10 @@
 	} \
 )
 
+# define TV_FROM_S(s) (\
+	(struct timeval){\
+		.tv_sec = s,\
+	} \
+)
+
 #endif
