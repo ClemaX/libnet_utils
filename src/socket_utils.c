@@ -19,8 +19,7 @@ int	socket_icmp(int *socket_type, uint8_t ttl, uint8_t tos)
 		*socket_type = SOCK_RAW;
 
 		setsockopt_err =
-			setsockopt(sd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on))
-			||	setsockopt(sd, IPPROTO_IP, IP_RECVERR, &on, sizeof(on));
+			setsockopt(sd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on));
 
 		if (!setsockopt_err)
 			*socket_type = SOCK_RAW;
